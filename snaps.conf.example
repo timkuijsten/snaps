@@ -1,0 +1,11 @@
+root /srv/snaps wheel
+createroot no
+
+user _snaps
+
+daily 6
+weekly 3
+monthly 3
+
+# Take a snapshot of the home dir at the host example.com
+backup  example.com:/home

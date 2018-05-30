@@ -1,0 +1,70 @@
+.Dd May 22, 2018
+.Dt SNAPS 8
+.Os
+.Sh NAME
+.Nm snaps
+.Nd easy and secure remote snapshots
+.Sh SYNOPSIS
+.Nm
+.Op Fl fhnqvV
+.Op Fl c Pa configfile
+.Op Fl s Ar filter
+.Sh DESCRIPTION
+The
+.Nm
+utility takes snapshots of remote locations using
+.Xr ssh 1
+and
+.Xr hrsync 1 ,
+which is a hardened version of rsync. Each location is being isolated from other
+locations that are being backed up in order to mitigate against a compromised
+remote host.
+.Pp
+The following arguments are supported:
+.Bl -tag -width Ds
+.It Fl f
+Force taking a new snapshot, even if the last snapshot has not yet expired.
+.It Fl h
+Print the synopsis of
+.Nm .
+.It Fl n
+Only check the syntax of the config file and exit.
+.It Fl q
+Be quiet, except for errors.
+.It Fl v
+Be more verbose.
+Multiple occurrences increase the verbosity level.
+.It Fl V
+Print the current version of
+.Nm
+and exit.
+.It Fl c Ar configfile
+Use an alternate configuration file.
+The default config file used is /etc/snaps.conf.
+.It Fl s Ar filter
+Only backup locations in the config file that match
+.Ar filter .
+Each configured location is canonicalized to user@host:path and can
+be filtered on any substring.
+This option can be passed multiple times so that more locations are matched.
+.El
+.Pp
+.Nm
+runs as an unprivileged user.
+This user must have access to a public/private key pair that is used by
+.Xr ssh 1
+to login to each remote location.
+.Sh FILES
+.Bl -tag -width "/etc/snaps.conf" -compact
+.It Pa /etc/snaps.conf
+Default configuration file.
+.El
+.Sh EXIT STATUS
+.Ex -std
+.Sh SEE ALSO
+.Xr hrsync 1 ,
+.Xr ssh 1 ,
+.Xr snaps.conf 5
+.Sh AUTHORS
+.An -nosplit
+.An Tim Kuijsten Aq Mt tim@netsend.nl

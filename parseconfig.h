@@ -1,0 +1,1 @@
+struct endpoint **parseconfig(int);

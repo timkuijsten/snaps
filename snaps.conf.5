@@ -1,0 +1,221 @@
+.Dd May 22, 2018
+.Dt SNAPS.CONF 5
+.Os
+.Sh NAME
+.Nm snaps.conf
+.Nd snaps configuration file
+.Sh DESCRIPTION
+The config file format for
+.Xr snaps 8
+is optimized for human read- and writability.
+.Pp
+Each config file consists of several statements.
+Statements are separated from each other by a semicolon or a newline.
+A statement consists of a keyword followed by one or more values.
+Special characters can be escaped by surrounding the value with double quotes or
+by prepending the special character with '\\'.
+Whenever a '#' is encountered the rest of the line will be ignored.
+The following characters are special: tab, space, newline, semicolon ';',
+hash '#', opening brace '{', double and single quote and backslash '\\'.
+.Pp
+The statement
+.Ar backup
+is the only statement that can be followed by a block.
+This is a convenient way to overrule global settings for one specific location.
+Blocks are denoted by braces.
+.Pp
+Since snaps is not a daemon, it should be run periodically, at least as often as
+the shortest configured interval.
+Note that unless -f is given, a new snapshot will only be taken if the last one
+has expired according to the configured
+intervals for a location.
+.Pp
+.Xr ssh 1
+is used to login to each remote and so the locally configured user must have
+it's own public/private key pair.
+See the
+.Ar user
+option for more information.
+.Pp
+The following options are supported:
+.Bl -tag -width Ds
+.It backup Ar location Op Brq ...
+Configure a
+.Ar location
+to take snapshots of.
+.Ar location
+has the form of [user@]host[:path].
+Where
+.Op user@
+and
+.Op :path
+override the global settings
+.Ar ruser
+and
+.Ar rpath ,
+respectively.
+A backup statement can optionally be followed by a block to override global
+settings for this specific location.
+Within the block any statement can be used except for the
+.Ar backup
+statement itself.
+.It createroot Ar bool
+Whether or not snaps should create the root directory if it does not exist.
+.Ar bool
+must be either
+.Qq yes
+or
+.Qq no .
+Defaults to yes.
+.It exec Ar path
+A path to a script to execute after hrsync is done.
+The script receives the exit status of hrsync through the first argument.
+The script itself should exit with status 0 if the new snapshot should be
+included, or >0 if it should be discarded.
+The current working directory of the process is set to that of the new snapshot
+and it is running with the same privileges as the hrsync process.
+.It group Ar groupname | gid
+The unprivileged group to run as.
+Defaults to the primary group of the configured
+.Ar user .
+.It Ar interval Ar number
+An interval with a number of snapshots to retain.
+.Ar interval
+must be one of
+.Qq hourly ,
+.Qq daily ,
+.Qq weekly
+or
+.Qq monthly .
+.Ar number
+must be an integer.
+The
+.Ar interval
+setting is mandatory and may appear multiple times to configure different
+intervals.
+.It root Ar path Op Ar group
+The root directory that contains the snapshots of one or more backup locations.
+Optionally the name of a group can be set to share all snapshots within this
+root with a specific group.
+By default snapshots are only readable by the superuser.
+The
+.Ar root
+setting is mandatory.
+.It rpath Ar path
+The remote path to use for a location.
+Can also be set implicitly via the
+.Ar location
+value to backup.
+.It rsyncargs Ar arg ...
+One or more extra arguments to pass to hrsync.
+.It rsyncexit Ar code ...
+One or more extra exit status codes from
+.Xr hrsync 1
+to treat as success besides the normal exit status of 0.
+.It ruser Ar username
+The remote user to login to a location.
+Can also be set implicitly via the
+.Ar location
+value to backup.
+Defaults to "root".
+.It user Ar username | uid
+A local unprivileged username or id used to execute
+.Xr hrsync 1 .
+This user must have access to a public/private key pair.
+The public key should be installed on every remote location.
+See
+.Xr useradd 8 ,
+AUTHORIZED_KEYS FILE FORMAT in
+.Xr sshd 8 ,
+and
+.Xr ssh-keygen 1
+for further information.
+This setting is mandatory and must not be set to the superuser.
+.El
+.Sh EXAMPLES
+A minimal config file that contains only the mandatory settings and one backup
+location could look like the following:
+.Bd -literal -offset indent
+root /srv/snaps
+user _snaps
+daily 6
+backup john@foo.example.com:/srv
+.Ed
+.Pp
+The above configures a backup directory, an unprivileged user to run as and a
+daily interval with at most six snapshots retained.
+Only one location is backed up, which is foo.example.com:/srv.
+The local user "_snaps" logs in on foo.example.com as the user "john".
+See
+.Ar user
+for requirements on the local user.
+.Pp
+The following example shows how to overrule global settings on a per location
+basis:
+.Bd -literal -offset indent
+root /srv/snaps
+createroot no
+user _snaps
+daily 6
+
+backup john@foo.example.com:/srv {
+	daily 0
+	monthly 3
+	rsyncexit 23 24
+}
+
+backup bar.example.com:/home {
+	hourly 12
+	exec /usr/local/bin/postsync.sh
+}
+.Ed
+.Pp
+Here two locations are being backed up.
+With some global settings and some settings specific to a backup location.
+.Pp
+For foo.example.com the following rules apply:
+.Bl -dash
+.It
+login as user john
+.It
+take a snapshot of /srv
+.It
+retain 3 monthly snapshots
+.It
+retain 0 daily snapshots
+.It
+include the snapshot even when hrsync exits with code 23 or 24
+.El
+.Pp
+For bar.example.com the following rules apply:
+.Bl -dash
+.It
+login as user root (the default
+.Ar ruser )
+.It
+take a snapshot of /home
+.It
+retain 6 daily snapshots (globally set and not overruled)
+.It
+retain 12 hourly snapshots.
+.It
+after hrsync finishes, run the custom script
+.Qq /usr/local/bin/postsync.sh
+which can inspect the new snapshot and can signal whether or not to include the
+new snapshot.
+.El
+.Pp
+Always make sure to run snaps at least as often as the shortest configured
+interval.
+With the last example that is at least twelve times a day because of the
+configured twelve hourly snapshots.
+.Sh SEE ALSO
+.Xr hrsync 1 ,
+.Xr ssh 1 ,
+.Xr ssh-keygen 1 ,
+.Xr snaps 8 ,
+.Xr sshd 8 ,
+.Xr useradd 8
+.Sh AUTHORS
+.An -nosplit
+.An Tim Kuijsten Aq Mt tim@netsend.nl
