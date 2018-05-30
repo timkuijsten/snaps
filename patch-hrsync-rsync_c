@@ -1,0 +1,22 @@
+--- rsync.c.orig	Sat May  5 20:11:42 2018
++++ rsync.c	Sat May  5 20:39:30 2018
+@@ -472,6 +472,10 @@
+ 	mode_t new_mode = file->mode;
+ 	int inherit;
+ 
++	/* Don't try to set attrs on the root dir, fake success. */
++	if (fname[0] == '.' && fname[1] == '\0')
++		return 1;
++
+ 	if (!sxp) {
+ 		if (dry_run)
+ 			return 1;
+@@ -786,7 +790,7 @@
+ 				return -1;
+ 		return -1;
+ 	}
+-	if (chdir("/") == -1)
++	if (chdir("/.sync.1") == -1)
+ 		return -1;
+ 
+         if (ouid)
