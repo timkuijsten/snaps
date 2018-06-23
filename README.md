@@ -90,8 +90,9 @@ Enter passphrase (empty for no passphrase):
 Enter same passphrase again:
 $ doas touch /home/_snaps/.ssh/known_hosts
 $ doas chown -R root /home/_snaps
+$ doas chown _snaps /home/_snaps/id_ed25519
 $ doas chmod 710 /home/_snaps/.ssh
-$ doas chmod 640 /home/_snaps/.ssh/{id_ed25519,id_ed25519.pub,known_hosts}
+$ doas chmod 640 /home/_snaps/.ssh/{id_ed25519.pub,known_hosts}
 ```
 
 ### 3. Each remote location must allow incoming ssh access
