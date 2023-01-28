@@ -26,7 +26,7 @@
 
 extern int verbose;
 
-const int CMDCLOSED, CMDSTART, CMDSTOP, CMDREADY, CMDROTCLEANUP,
+extern const int CMDCLOSED, CMDSTART, CMDSTOP, CMDREADY, CMDROTCLEANUP,
 	CMDROTINCLUDE, CMDCUST;
 
 /* temp key value store */
