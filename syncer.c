@@ -24,7 +24,7 @@ execrsync(const struct endpoint *ep, const char *destdir, const char *linkdest)
 		rsyncbin = ep->rsyncbin;
 
 	rsyncargv = addstr(rsyncargv, basename(rsyncbin));
-	rsyncargv = addstr(rsyncargv, "-az");
+	rsyncargv = addstr(rsyncargv, "-azz");
 	rsyncargv = addstr(rsyncargv, "--delete");
 	/* prevent pledges for getpw, unix and dpath */
 	rsyncargv = addstr(rsyncargv, "--numeric-ids");
