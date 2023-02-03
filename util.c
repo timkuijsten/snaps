@@ -1547,6 +1547,45 @@ privdrop(uid_t uid, gid_t gid)
 }
 
 /*
+ * Drop superuser privileges irreversible.
+ *
+ * Return 0 on success, -1 on failure with errno set.
+ * TODO use privdrop
+ */
+int
+dropsuperuser(uid_t uiddrop, gid_t giddrop)
+{
+	/* Make sure were requested to do something meaningful. */
+	if (uiddrop == 0) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	/*
+	 * We need to be the superuser in order to clear supplementary group ids
+	 * and all three user and group ids.
+	 */
+
+	if (geteuid() != 0)
+		if (seteuid(0) == -1)
+			err(1,"seteuid");
+
+	/* set supplementary groups to the new group only */
+	if (setgroups(1, &giddrop) == -1)
+		return -1;
+
+	/* change real, effective and saved group-id */
+	if (setresgid(giddrop, giddrop, giddrop) == -1)
+		return -1;
+
+	/* change real, effective and saved user-id */
+	if (setresuid(uiddrop, uiddrop, uiddrop) == -1)
+		return -1;
+
+	return 0;
+}
+
+/*
  * Execute a custom binary after the syncer has terminated.
  */
 void
