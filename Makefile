@@ -1,45 +1,75 @@
+CFLAGS += -std=c89 -Wall -Wextra -pedantic-errors ${INCLUDES}
+
+SRCFILES = intv.c parseconfig.c rotator.c snaps.c strv.c syncer.c util.c
+
+ETCDIR = /etc
+PREFIX = /usr/local
+BINDIR = ${PREFIX}/sbin
+MANDIR = ${PREFIX}/man
+
+INSTALL_DIR = install -dm 755
+INSTALL_ETC = install -m 0640
+INSTALL_BIN = install -m 0555 -g bin
+INSTALL_MAN = install -m 0444
+
 FETCH=ftp
 CKSUM=sha256
 
-HRSYNCV=1.0.1
+HRSYNCVER=1.0.1
+HRSYNCDIR=hrsync-${HRSYNCVER}
+HRSYNCBIN=${HRSYNCDIR}/hrsync
 
-all:
-	make build
+all: snaps prsync
 
-hrsync.tar.gz:
-	${FETCH} https://github.com/timkuijsten/hrsync/archive/refs/tags/v${HRSYNCV}.tar.gz
-	mv v${HRSYNCV}.tar.gz hrsync.tar.gz
+snaps: snaps.o strv.o intv.o util.o rotator.o syncer.o parseconfig.o y.tab.o
+	${CC} ${CFLAGS} -o $@ snaps.o strv.o intv.o util.o rotator.o syncer.o \
+	    parseconfig.o y.tab.o ${LDFLAGS}
 
-hrsync: hrsync.tar.gz
+# currently scfg.y has an anonymous union that should be removed for c89
+# compatibility
+y.tab.o: y.tab.c
+	${CC} ${CFLAGS} -std=c11 -c y.tab.c
+
+.SUFFIXES: .c .o
+.c.o:
+	${CC} ${CFLAGS} -c $<
+
+y.tab.c: scfg.y
+	yacc scfg.y
+
+lint:
+	${CC} ${CFLAGS} -fsyntax-only ${SRCFILES} 2>&1
+
+v${HRSYNCVER}.tar.gz:
+	${FETCH} https://github.com/timkuijsten/hrsync/archive/refs/tags/v${HRSYNCVER}.tar.gz
+
+${HRSYNCBIN}: v${HRSYNCVER}.tar.gz
+	ln v${HRSYNCVER}.tar.gz hrsync.tar.gz
 	${CKSUM} -c SHA256SUMS
 	tar zxf hrsync.tar.gz
-	mv hrsync-${HRSYNCV} hrsync
-	# let hrsync patch rsync
-	cd hrsync && make rsync-3.1.3
-	# then apply our own patches on top of it
-	patch hrsync/rsync-3.1.3/rsync.c	patch-hrsync-rsync_c
-	patch hrsync/rsync-3.1.3/util.c	patch-hrsync-util_c
+	# first let hrsync patch rsync, then we patch and build
+	cd ${HRSYNCDIR} && make rsync-3.1.3
+	patch ${HRSYNCDIR}/rsync-3.1.3/rsync.c patch-hrsync-rsync_c
+	patch ${HRSYNCDIR}/rsync-3.1.3/util.c  patch-hrsync-util_c
+	cd ${HRSYNCDIR} && make
 
-prsync: hrsync
-	cd hrsync && make
-	cp hrsync/hrsync prsync
+prsync: ${HRSYNCBIN}
+	cp ${HRSYNCBIN} prsync
 
-snaps: *.[ych]
-	yacc scfg.y
-	cc -Wall -g strv.c intv.c util.c y.tab.c rotator.c syncer.c \
-		parseconfig.c snaps.c -o snaps
-
-build: snaps prsync
-
-install: snaps prsync
-	install -m 0555 -g bin snaps prsync /usr/local/sbin
-	install -m 0444 -g bin snaps.8 /usr/local/man/man8
-	install -m 0444 -g bin snaps.conf.5 /usr/local/man/man5
-	install -m 0640 snaps.conf.example /etc/examples/snaps.conf
+install: all
+	${INSTALL_DIR} ${DESTDIR}${ETCDIR}
+	${INSTALL_DIR} ${DESTDIR}${BINDIR}
+	${INSTALL_DIR} ${DESTDIR}${MANDIR}/man5
+	${INSTALL_DIR} ${DESTDIR}${MANDIR}/man8
+	${INSTALL_ETC} snaps.conf.example ${DESTDIR}${ETCDIR}
+	${INSTALL_BIN} prsync snaps ${DESTDIR}${BINDIR}
+	${INSTALL_MAN} snaps.conf.5 ${DESTDIR}${MANDIR}/man5
+	${INSTALL_MAN} snaps.8 ${DESTDIR}${MANDIR}/man8
 
 clean:
-	rm -f snaps prsync y.tab.c y.output tutil tscfg
-	rm -rf hrsync/ /tmp/snapstestutil
+	rm -f v${HRSYNCVER}.tar.gz snaps prsync *.o y.tab.c y.output tutil \
+	    tscfg hrsync.tar.gz
+	rm -rf ${HRSYNCDIR}/ /tmp/snapstestutil
 
 docs:
 	mandoc -T html -Ostyle=man.css snaps.8 > snaps.8.html
