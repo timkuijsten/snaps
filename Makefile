@@ -1,14 +1,14 @@
 FETCH=ftp
 CKSUM=sha256
 
-HRSYNCV=2665357d7b8242e4586beef83e9d302aa4101ea7
+HRSYNCV=1.0.1
 
 all:
 	make build
 
 hrsync.tar.gz:
-	${FETCH} https://github.com/timkuijsten/hrsync/archive/${HRSYNCV}.tar.gz
-	mv ${HRSYNCV}.tar.gz hrsync.tar.gz
+	${FETCH} https://github.com/timkuijsten/hrsync/archive/refs/tags/v${HRSYNCV}.tar.gz
+	mv v${HRSYNCV}.tar.gz hrsync.tar.gz
 
 hrsync: hrsync.tar.gz
 	${CKSUM} -c SHA256SUMS
