@@ -24,8 +24,10 @@ prsync: hrsync
 	cd hrsync && make
 	cp hrsync/hrsync prsync
 
-snaps: *.[ych]
+y.tab.c: scfg.y
 	yacc scfg.y
+
+snaps: *.[ch]
 	cc -Wall -g strv.c intv.c util.c y.tab.c rotator.c syncer.c \
 		parseconfig.c snaps.c -o snaps
 
