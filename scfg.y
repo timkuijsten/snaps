@@ -69,10 +69,10 @@ grammar:	/* new */ {
 		}
 	}
 	| grammar termv block EOS {
-		if (verbose > 2)
-			warnx("grammar: grammar termv block EOS %p %p %p", $1, $2, $3);
-
 		struct scfgentry *scfge;
+
+		if (verbose > 2)
+			warnx("grammar: grammar termv block EOS");
 
 		scfge = scfg_allocentry();
 
@@ -99,7 +99,7 @@ termv:	/* optional */ {
 	}
 	| termv STRING {
 		if (verbose > 2)
-			warnx("termv: termv STRING %p %s", $1, $2);
+			warnx("termv: termv STRING %s", $2);
 
 		$$ = addstr($1, $2);
 	}
@@ -112,7 +112,7 @@ block:	/* optional */ {
 	}
 	| OBRACE grammar CBRACE {
 		if (verbose > 2)
-			warnx("BLOCK: OBRACE grammar CBRACE { %p }", $2);
+			warnx("BLOCK: OBRACE grammar CBRACE { ... }");
 
 		if ($2->block == NULL && $2->termv == NULL)
 			scfg_freeentry(&$2);
@@ -591,7 +591,7 @@ scfg_freeentry(struct scfgentry **scfge)
 	allocated--;
 
 	if (verbose > 2 )
-		warnx("%s: deallocated %p %d", __func__, *scfge, allocated);
+		warnx("%s: deallocated %d", __func__, allocated);
 
 	free(*scfge);
 	*scfge = NULL;
@@ -645,7 +645,7 @@ scfg_allocentry(void)
 		err(1, "%s: malloc", __func__);
 	allocated++;
 	if (verbose > 2 )
-		warnx("%s:  allocated %p %d", __func__, scfge, allocated);
+		warnx("%s:  allocated %d", __func__, allocated);
 
 	scfge->termv = NULL;
 	scfge->block = NULL;
