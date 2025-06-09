@@ -24,6 +24,8 @@
 			 * time to make a new backup.
 			 */
 
+#define UNSHARED ((unsigned int)-1)
+
 extern int verbose;
 
 extern const int CMDCLOSED, CMDSTART, CMDSTOP, CMDREADY, CMDROTCLEANUP,

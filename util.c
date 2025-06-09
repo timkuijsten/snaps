@@ -501,7 +501,7 @@ secureensuredir(const char *p, mode_t mode, gid_t gid, int *updmod)
 	 * Ensure the requested group owner.
 	 */
 
-	if (gid != -1) {
+	if (gid != UNSHARED) {
 		if (st.st_gid != gid) {
 			if (chown(path, -1, gid) == -1)
 				return -1;
@@ -722,7 +722,7 @@ trustedpath(const char *p, mode_t relax, gid_t gid, int *trusted, int *ex)
 		if ((mode & ~relax) != 0)
 			return 0;
 
-		if (gid != -1)
+		if (gid != UNSHARED)
 			if (st.st_gid != gid)
 				return 0;
 	}
