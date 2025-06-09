@@ -1358,8 +1358,9 @@ newestsnapshotininterval(struct endpoint *ep, struct snapinterval *si, struct sn
 {
 	struct snapshot sn;
 	time_t age;
+	int i;
 
-	for (int i = 1; i <= si->count; i++) {
+	for (i = 1; i <= si->count; i++) {
 		if (setsnapshot(ep, si->name, i, &sn) == -1)
 			err(1, "%s: setsnapshot", __func__);
 
