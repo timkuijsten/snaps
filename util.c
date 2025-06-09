@@ -384,7 +384,8 @@ int
 secureensuredir(const char *p, mode_t mode, gid_t gid, int *updmod)
 {
 	struct stat st;
-	int created = 0, done, trusted, i;
+	size_t i;
+	int created = 0, done, trusted;
 	char path[PATH_MAX], *slash;
 	mode_t cmode;
 
