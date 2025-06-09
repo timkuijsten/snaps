@@ -23,7 +23,7 @@ execrsync(const struct endpoint *ep, const char *destdir, const char *linkdest)
 	else
 		rsyncbin = ep->rsyncbin;
 
-	rsyncargv = addstr(rsyncargv, basename(rsyncbin));
+	rsyncargv = addstr(rsyncargv, basename((char *)rsyncbin));
 	rsyncargv = addstr(rsyncargv, "-azz");
 	rsyncargv = addstr(rsyncargv, "--delete");
 	/* prevent pledges for getpw, unix and dpath */
