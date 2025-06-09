@@ -459,7 +459,7 @@ out:
 int
 saveset(struct tmpkv *kv, size_t size, const char *key, char *val, char **mval)
 {
-	int i;
+	size_t i;
 
 	for (i = 0; i < size; i++) {
 		if (strcmp(kv->key, key) == 0) {
@@ -482,7 +482,7 @@ saveset(struct tmpkv *kv, size_t size, const char *key, char *val, char **mval)
 char *
 getkey(struct tmpkv *kv, size_t size, const char *key)
 {
-	int i;
+	size_t i;
 
 	for (i = 0; i < size; i++)
 		if (strcmp(key, kv[i].key) == 0)
@@ -499,7 +499,7 @@ getkey(struct tmpkv *kv, size_t size, const char *key)
 int
 haskey(struct tmpkv *kv, size_t size, const char *key)
 {
-	int i;
+	size_t i;
 
 	if (key == NULL)
 		return 0;
@@ -521,7 +521,7 @@ haskey(struct tmpkv *kv, size_t size, const char *key)
 struct tmpkv *
 gettmpkv(char *key)
 {
-	int i;
+	size_t i;
 
 	if (verbose > 2)
 		warnx("looking up \"%s\"", key);
@@ -767,8 +767,8 @@ int
 parsehoststr(const char *inp, char **rruser, char **rhostname, char **rrpath)
 {
 	enum states { S, HORR, HOST, PATH, ERR, E };
-	size_t vallen;
-	int state, i;
+	size_t i, vallen;
+	int state;
 	char *ruser, *hostname, *rpath, *cp, *str;
 
 	if ((str = strdup(inp)) == NULL)

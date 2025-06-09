@@ -641,7 +641,7 @@ trustedpath(const char *p, mode_t relax, gid_t gid, int *trusted, int *ex)
 			}
 
 			slen = readlink(path, symlink, sizeof(symlink));
-			if (slen == -1) {
+			if (slen < 0) {
 				return -1;
 			} else if (slen == 0) {
 				errno = EINVAL;
@@ -656,7 +656,7 @@ trustedpath(const char *p, mode_t relax, gid_t gid, int *trusted, int *ex)
 			/* If there is anything left, append it to symlink. */
 			if (!eop) {
 				if (symlink[slen - 1] != '/') {
-					if (slen + 1 >= sizeof(symlink)) {
+					if ((size_t)slen + 1 >= sizeof(symlink)) {
 						errno = ENAMETOOLONG;
 						return -1;
 					}
