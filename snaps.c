@@ -279,7 +279,7 @@ main(int argc, char *argv[])
 		}
 
 		relax = 0;
-		if (epv[n]->shared != -1)
+		if (epv[n]->shared != UNSHARED)
 			relax = S_IRGRP | S_IXGRP;
 
 		if (trustedpath(epv[n]->root, relax, epv[n]->shared, &trusted,
@@ -293,7 +293,7 @@ main(int argc, char *argv[])
 				"component must have mode %s.",
 				getepid(epv[n]),
 				epv[n]->root,
-				epv[n]->shared == -1 ? "0700" : "0750");
+				epv[n]->shared == UNSHARED ? "0700" : "0750");
 			epv = snaps_rm_endpoint(epv, epv[n]);
 			continue;
 		}
@@ -307,7 +307,7 @@ main(int argc, char *argv[])
 		}
 
 		mode = S_IRWXU;
-		if (epv[n]->shared != -1)
+		if (epv[n]->shared != UNSHARED)
 			mode |= S_IRGRP | S_IXGRP;
 
 		if (secureensuredir(epv[n]->root, mode, epv[n]->shared,
@@ -324,7 +324,7 @@ main(int argc, char *argv[])
 		 */
 
 		relax = S_IXGRP | S_IXOTH;
-		if (epv[n]->shared != -1)
+		if (epv[n]->shared != UNSHARED)
 			relax |= S_IRGRP;
 
 		if (trustedpath(epv[n]->path, relax, epv[n]->shared, &trusted,
@@ -332,7 +332,7 @@ main(int argc, char *argv[])
 			err(1, "%s: trustedpath", __func__);
 
 		if (!trusted) {
-			if (epv[n]->shared == -1) {
+			if (epv[n]->shared == UNSHARED) {
 				warnx("insecure mode: path must be "
 					"owned by wheel and must not be"
 					" readable or writable by the "
@@ -351,7 +351,7 @@ main(int argc, char *argv[])
 		}
 
 		mode = S_IRWXU | S_IXGRP | S_IXOTH;
-		if (epv[n]->shared != -1)
+		if (epv[n]->shared != UNSHARED)
 			mode |= S_IRGRP;
 
 		if (secureensuredir(epv[n]->path, mode, epv[n]->shared,

@@ -308,7 +308,7 @@ createendpoint(struct scfgentry *ce)
 	 * based on chown(1) and POSIX).
 	 */
 
-	shared = -1;
+	shared = UNSHARED;
 	if (root && root[1] != NULL) {
 		grp = getgrnam(root[1]);
 		if (grp != NULL) {
