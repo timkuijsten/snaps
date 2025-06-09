@@ -74,6 +74,7 @@ char **getmsetting(char *);
 int **getmnsetting(char *);
 int getbsetting(char *, int *);
 int getnsetting(char *, int *);
+int getunsetting(char *, unsigned int *);
 int haskey(struct tmpkv *, size_t, const char *);
 char *getkey(struct tmpkv *, size_t, const char *);
 int parsehoststr(const char *, char **, char **, char **);
@@ -315,7 +316,7 @@ createendpoint(struct scfgentry *ce)
 			shared = grp->gr_gid;
 		} else {
 			/* Maybe it's a gid. */
-			if (getnsetting("shared", &shared) == -1) {
+			if (getunsetting("shared", &shared) == -1) {
 				warnx("could not determine shared group id of"
 					" \"%s\"", root[1]);
 				e = 1;
@@ -342,7 +343,7 @@ createendpoint(struct scfgentry *ce)
 
 			/* Maybe it's a uid. */
 
-			if (getnsetting("user", &uid) == -1) {
+			if (getunsetting("user", &uid) == -1) {
 				warnx("could not determine user id of user "
 					"\"%s\"", tmp);
 				e = 1;
@@ -384,7 +385,7 @@ createendpoint(struct scfgentry *ce)
 
 			/* Maybe it's a gid. */
 
-			if (getnsetting("group", &gid) == -1) {
+			if (getunsetting("group", &gid) == -1) {
 				warnx("could not determine group id of "
 					"\"%s\"", tmp);
 				e = 1;
@@ -650,7 +651,7 @@ getbsetting(char *key, int *res)
 }
 
 /*
- * Get the numeric value of a setting.
+ * Get the signed numeric value of a setting.
  *
  * Stores the result in res.
  *
@@ -666,6 +667,29 @@ getnsetting(char *key, int *res)
 		return -1;
 
 	*res = strtonum(cp, INT_MIN, INT_MAX, &errstr);
+	if (errstr != NULL)
+		return -1;
+
+	return 0;
+}
+
+/*
+ * Get the unsigned numeric value of a setting.
+ *
+ * Stores the result in res.
+ *
+ * Returns 0 on success and -1 on error.
+ */
+int
+getunsetting(char *key, unsigned int *res)
+{
+	const char *errstr;
+	char *cp;
+
+	if ((cp = getsetting(key)) == NULL)
+		return -1;
+
+	*res = strtonum(cp, 0, UINT_MAX, &errstr);
 	if (errstr != NULL)
 		return -1;
 
