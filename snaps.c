@@ -19,7 +19,7 @@
 #include "rotator.h"
 #include "syncer.h"
 
-#define VERSION "1.0.0-beta1"
+#define VERSION "1.0.0"
 
 #define CONFIGFILE "/etc/snaps.conf"
 #define EMPTYDIR "/var/empty"
