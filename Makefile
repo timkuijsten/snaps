@@ -1,3 +1,7 @@
+CFLAGS += -std=c89 -Wall -Wextra -pedantic-errors ${INCLUDES}
+
+SRCFILES = intv.c parseconfig.c rotator.c snaps.c strv.c syncer.c util.c
+
 FETCH=ftp
 CKSUM=sha256
 
@@ -38,6 +42,9 @@ install: snaps prsync
 	install -m 0444 -g bin snaps.8 /usr/local/man/man8
 	install -m 0444 -g bin snaps.conf.5 /usr/local/man/man5
 	install -m 0640 snaps.conf.example /etc/examples/snaps.conf
+
+lint:
+	${CC} ${CFLAGS} -fsyntax-only ${SRCFILES} 2>&1
 
 clean:
 	rm -f snaps prsync y.tab.c y.output tutil tscfg
