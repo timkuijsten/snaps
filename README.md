@@ -7,7 +7,7 @@ Features:
 * Easy to read and write config file format
 * Privilege separated, pledged and chrooted
 
-Status: **public beta**
+Status: **stable**
 
 The main improvements of snaps over other backup software are better security
 through isolation, a reduced attack surface, and easier to configure and
